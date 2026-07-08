@@ -5,14 +5,11 @@
 - [ ] Check CPU usage
 - [ ] Check memory usage
 - [ ] Check disk capacity
-- [ ] Check server uptime
-- [ ] Check network connectivity
 
 ## 2. Tableau Services Check
 
 - [ ] Verify Tableau Server overall status
 - [ ] Check gateway status
-- [ ] Check repository status
 - [ ] Check backgrounder status
 - [ ] Check vizqlserver status
 - [ ] Check dataserver status
@@ -20,7 +17,6 @@
 ## 3. Backup and Recovery Check
 
 - [ ] Verify latest backup availability
-- [ ] Confirm backup file location
 - [ ] Validate backup schedule
 - [ ] Confirm backup storage capacity
 
