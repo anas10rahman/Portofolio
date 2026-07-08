@@ -8,7 +8,7 @@
 
 ## Initial Checks
 
-- Run `free -h`
+- Run `free -m -h`
 - Run `top`
 - Identify top memory-consuming processes
 - Check Tableau service status
