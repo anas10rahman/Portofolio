@@ -7,54 +7,59 @@
 
 - Date: 2025-06-18
 - Reported by: Client A — BI Team (via support ticket)
-- Environment: Tableau Server (Production, single-node), Linux
+- Environment: Tableau Server (Production), Linux
 - Priority: High
 - Status: Resolved
 
 ## Summary
 
-Users reported that the Tableau Server web portal was unreachable. The login page returned a gateway error and no dashboards could be accessed.
+The client reported that the **Data Server** service on Tableau Server was in an error state, affecting data source connectivity. Log analysis showed that the issue was not limited to Data Server — the **Backgrounder** and **VizQL Server** services had also errored. All three had been terminated by the **Server Resource Manager (SRM)** due to memory exhaustion. Services were restored after a restart.
 
 ## Impact
 
-- Approximately 120 users were unable to access Tableau Server for about 35 minutes.
-- Scheduled extract refreshes during the window were delayed.
+- Published data source connections and extract-based dashboards were affected.
+- Background jobs (extract refreshes and subscriptions) failed during the window.
+- Impact lasted until the services were restarted and validated.
 
 ## Timeline
 
 | Time  | Activity |
 |---|---|
-| 08:42 | Support ticket received — "Tableau not accessible" |
-| 08:47 | Confirmed portal unreachable; ran `tsm status -v` |
-| 08:52 | Identified Gateway service stopped; disk volume at 92% |
-| 09:03 | Archived old logs per retention policy; freed ~40 GB |
-| 09:10 | Restarted Gateway service; portal restored |
-| 09:17 | Confirmed access with reporter; incident closed |
+| 10:05 | Support ticket received — "Data Server service error on Tableau Server" |
+| 10:12 | Confirmed service state with `tsm status -v` |
+| 10:20 | Collected server logs using `tsm maintenance ziplogs` |
+| 10:35 | Analyzed logs with Logshark to trace the root cause |
+| 10:50 | Found Data Server, Backgrounder, and VizQL Server terminated by SRM due to full memory |
+| 11:00 | Restarted the affected services |
+| 11:08 | Confirmed all services healthy; validated with the reporter; incident closed |
 
 ## Troubleshooting Performed
 
-1. Verified server connectivity and reachability.
-2. Ran `tsm status -v` — Gateway service reported as stopped.
-3. Checked system resources with `df -h`; log volume at 92%.
-4. Reviewed gateway logs — repeated write failures caused by low disk space.
-5. Archived and removed old logs per retention policy.
-6. Restarted the Gateway service and validated portal availability.
+1. Confirmed the reported Data Server error using `tsm status -v`.
+2. Collected the server logs with `tsm maintenance ziplogs`.
+3. Analyzed the logs with **Logshark** to trace the error and identify the root cause.
+4. Found that Data Server was **not** the only affected service — **Backgrounder** and **VizQL Server** had errored as well.
+5. Log evidence showed the **Server Resource Manager (SRM)** had terminated these services because system memory (RAM) was fully utilized, to protect the stability of the other running services.
+6. Restarted the affected services.
+7. Validated that all services returned to a healthy running state.
 
 ## Root Cause
 
-Log directory growth filled the disk volume, preventing the Gateway service from writing and causing it to stop.
+System memory (RAM) was fully consumed. The **Server Resource Manager (SRM)** responded by terminating the **Data Server**, **Backgrounder**, and **VizQL Server** processes to prevent the memory pressure from destabilizing the rest of the platform. The reported "Data Server error" was a **symptom** of this memory-driven termination, not an isolated Data Server fault.
 
 ## Resolution
 
-Freed disk space by archiving old logs, then restarted the Gateway service. Portal access was fully restored and confirmed with the reporting user.
+Restarted the affected Tableau Server services. After the restart, memory was released and all services — including Data Server, Backgrounder, and VizQL Server — returned to a normal running state. Data source connectivity and background jobs were confirmed working with the reporting user.
 
 ## Recommendation
 
-- Add a disk-usage alert threshold at 80% for early warning.
-- Schedule automated log archival and cleanup.
-- Include disk capacity validation in the weekly preventive maintenance checklist.
+- Add memory-usage monitoring with an alert threshold (e.g., 85%) for early warning before SRM termination occurs.
+- Review server sizing and process configuration (Backgrounder and VizQL Server instances) against the actual workload.
+- Review heavy extract-refresh schedules that may cause memory spikes, and stagger them where possible.
+- Include memory-utilization validation in the preventive maintenance checklist.
 
 ## Attachment / Evidence
 
 - `tsm status -v` output before and after the fix (logs masked).
-- `df -h` output showing disk recovery after cleanup.
+- Logshark analysis summary highlighting the SRM termination events.
+- Memory-utilization snapshot at the time of the incident.
