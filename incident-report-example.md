@@ -6,14 +6,14 @@
 ## Incident Information
 
 - Date: 2025-06-18
-- Reported by: Client A — BI Team (via support ticket)
+- Reported by: Client A — BI Team
 - Environment: Tableau Server (Production), Linux
 - Priority: High
 - Status: Resolved
 
 ## Summary
 
-The client reported that the **Data Server** service on Tableau Server was in an error state, affecting data source connectivity. Log analysis showed that the issue was not limited to Data Server — the **Backgrounder** and **VizQL Server** services had also errored. All three had been terminated by the **Server Resource Manager (SRM)** due to memory exhaustion. Services were restored after a restart.
+The client reported that the **Data Server** service on Tableau Server was in an error state, affecting data source connectivity. Log analysis showed that the issue was not limited to Data Server — the **Backgrounder** and **VizQL Server** services had also in an error state. All three had been terminated by the **Server Resource Manager (SRM)** due to memory exhaustion. Services were restored after a restart.
 
 ## Impact
 
@@ -25,13 +25,13 @@ The client reported that the **Data Server** service on Tableau Server was in an
 
 | Time  | Activity |
 |---|---|
-| 10:05 | Support ticket received — "Data Server service error on Tableau Server" |
-| 10:12 | Confirmed service state with `tsm status -v` |
-| 10:20 | Collected server logs using `tsm maintenance ziplogs` |
-| 10:35 | Analyzed logs with Logshark to trace the root cause |
-| 10:50 | Found Data Server, Backgrounder, and VizQL Server terminated by SRM due to full memory |
-| 11:00 | Restarted the affected services |
-| 11:08 | Confirmed all services healthy; validated with the reporter; incident closed |
+| 14:05 | Client report ticket received — "Data Server service error on Tableau Server" |
+| 14:15 | Confirmed service state with `tsm status -v` |
+| 15:30 | Collected server logs using `tsm maintenance ziplogs` |
+| 16:45 | Analyzed logs with Logshark to trace the root cause |
+| 17:00 | Found Data Server, Backgrounder, and VizQL Server terminated by SRM due to full memory |
+| 17:00 | Restarted the affected services |
+| 17:10 | Confirmed all services healthy; validated with the reporter; incident closed |
 
 ## Troubleshooting Performed
 
